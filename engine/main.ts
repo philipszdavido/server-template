@@ -1,5 +1,6 @@
+import { evaluateExpr } from "./expr_parser";
 import { convertHTML } from "./html";
-import {parse} from "parse5"
+import {parse, serialize} from "parse5"
 
 // Example usage:
 const inputHTML = `
@@ -10,7 +11,7 @@ const inputHTML = `
   <title>Example</title>
 </head>
 <body>
-  <div>{{someExpression}}</div>
+  <div>{{2+4}}</div>
   <div>@for(i=0; i<10; i++) { <h1>My First Heading</h1> }</div>
   <div>@if(x > 5) { <h1>My First Heading</h1> }</div>
 </body>
@@ -18,17 +19,58 @@ const inputHTML = `
 `;
 
 const convertedHTML = convertHTML(inputHTML);
-const nodes = parse(convertedHTML)
+const rootNode = parse(convertedHTML)
 
-function parseNode(nodes: any) {
-    if (nodes.childNodes) {
-        nodes.childNodes.forEach((node: any) => {
-            console.log(node.nodeName)
-            parseNode(node)
+const variables = {
+    x: 90
+}
+
+function parseNode(node: any) {
+    if (node.childNodes) {
+        node.childNodes.forEach((childNode: any, index: number) => {
+            
+            const nodeName = childNode.nodeName;
+            const parentNode = node;
+
+            if(nodeName === "expr-interpl") {
+                const expr = childNode?.attrs?.[0]?.value;
+
+                // @ts-ignore
+                node.childNodes[index] = {
+                    nodeName: "#text",
+                    value: evaluateExpr(expr, variables)
+                }
+
+            }
+            
+            if(nodeName === "for") {
+
+            }
+
+            if(nodeName === "if") {
+
+                const expr = childNode?.attrs?.[0]?.value;
+                const result = evaluateExpr(expr, variables)
+
+                if(result) {
+                    
+                    node.childNodes.splice(index, 1, ...childNode?.childNodes);
+
+                } else {
+                    node.childNodes[index] = null;
+                    delete node.childNodes
+                }
+
+            }
+            
+            parseNode(childNode)
+
         });
     }
 }
 
-parseNode(nodes)
+parseNode(rootNode)
 
-// console.log(convertedHTML, nodes);
+const modifiedHtmlString = serialize(rootNode);
+
+console.log(modifiedHtmlString);
