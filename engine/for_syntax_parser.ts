@@ -1,17 +1,17 @@
 class Literal  {
-    constructor(value: string) {}
+    constructor(public value: string) {}
 }
 
 class Identifier {
-    constructor(name: string) {}
+    constructor(public name: string) {}
 }
 
 class ArrayExpression {
-    constructor(elements: Literal[]) {}
+    constructor(public elements: Literal[]) {}
 }
 
 class ForOfStatement {
-    constructor(left: Identifier, right: ArrayExpression) {}
+    constructor(public left: Identifier, public right: ArrayExpression | Identifier) {}
 }
 
 const evaluateForCondition = (expr: string) => {
@@ -73,6 +73,8 @@ const parseIntoArrayAstTree = (ast: string[]) => {
 
     const astLength = ast.length
     const middleOf = ast[1]
+    const firstOf = ast[0]
+    const lastEl = ast[ast.length - 1];
 
     if(astLength !== 3) {
         throw Error("Invalid For-Of statement.")
@@ -85,20 +87,73 @@ const parseIntoArrayAstTree = (ast: string[]) => {
     }
 
     // check that the first element is an identifier
-    if(!/^[a-zA-Z]+$/.test(ast[0])) {
+    if(!/^[a-zA-Z]+$/.test(firstOf)) {
         throw Error("for(item of items). The 'items' must be an identifier.")
         return;
     }
 
     // check if the last element is an identifier or array
 
-    const lastEl = ast[ast.length - 1];
 
     if(lastEl[0] === "[" && lastEl[lastEl.length - 1] === "]") {
+        // build the array elements
 
+        const elements = buildArrayElements(lastEl)
+
+        // array
+        const left = new Identifier(firstOf)
+        const right = new ArrayExpression(elements)
+
+        return new ForOfStatement(left , right);
+
+    } else {
+        // identifier array
+        const left = new Identifier(firstOf)
+        const right = new Identifier(lastEl)
+
+        return new ForOfStatement(left , right);
+        
     }
 
 }
 
-console.log(evaluateForCondition("item of fruits"))
-console.log(evaluateForCondition("item of [90, 89, 34]"))
+const buildArrayElements = (arrayString: string) => {
+    // remove [ and ]
+    const result = arrayString.split("").filter(token => {
+
+        if(token == "[") {
+            return false
+        }
+
+        if(token == "]") {
+            return false
+        }
+
+        return true
+    }).join("").split(",").map((part) => new Literal(part.trim()))
+
+    return result
+}
+
+function isValidType(value: any) {
+    const type = typeof value;
+
+    // Check against valid JavaScript data types
+    return (
+        type === 'string' ||
+        type === 'number' ||
+        type === 'bigint' ||
+        type === 'boolean' ||
+        type === 'symbol' ||
+        type === 'undefined' ||
+        type === 'object' ||
+        type === 'function'
+    );
+}
+
+// console.log(evaluateForCondition("item of fruits"))
+// console.log(evaluateForCondition("item of [90, 89, 34]"))
+// console.log(buildArrayElements("[90, 89, 34, ]"))
+const asts = evaluateForCondition("item of [90, 89, 34]")
+const result = parseIntoArrayAstTree(asts)
+console.log(result)
