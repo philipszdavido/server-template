@@ -151,10 +151,48 @@ function isValidType(value: any) {
     );
 }
 
-export const evaluateForCondition = (expr: string) => {
+export const evaluateForCondition = (expr: string, env: any) => {
     const asts = parseForExpr(expr)
     const result = parseIntoArrayAstTree(asts)
+
+    // if(result) {
+    //     if(result?.right instanceof Identifier) {
+    //         const value = env?.[result?.right?.name];
+    //         result.right = new ArrayExpression(new Literal(value))
+    //     }
+    // }
+
     return result
+}
+
+export const getArrayValue = (forStatement: ForOfStatement, env: any): Array<any> => {
+
+    let returnArray = []
+
+    if(forStatement?.right instanceof Identifier) {
+        const value = env?.[forStatement?.right?.name];
+
+        // return value
+
+        returnArray = value
+    } 
+
+    if(forStatement?.right instanceof ArrayExpression) {
+        const array = []
+
+        for (let index = 0; index < forStatement?.right.elements.length; index++) {
+            const element = forStatement?.right.elements[index];
+            array.push(element)
+        }
+
+        returnArray = array
+        
+        // return array;
+
+    }
+
+    return returnArray
+
 }
 
 // console.log(evaluateForCondition("item of fruits"))

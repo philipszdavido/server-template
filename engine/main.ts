@@ -1,5 +1,5 @@
 import { evaluateExpr } from "./expr_parser";
-import { evaluateForCondition } from "./for_syntax_parser";
+import { evaluateForCondition, getArrayValue } from "./for_syntax_parser";
 import { convertHTML } from "./html";
 import {parse, serialize} from "parse5"
 
@@ -13,7 +13,7 @@ const inputHTML = `
 </head>
 <body>
   <div>{{2+4}}</div>
-  <div>@for(i of [7,9]) { <h1>My First Heading</h1> }</div>
+  <div>@for(i of [7,9]) { <span>For Child</span> }</div>
   <div>@if(x > 5) { <h1>My First Heading</h1> }</div>
 </body>
 </html>
@@ -26,7 +26,7 @@ const variables = {
     x: 90
 }
 
-function parseNode(node: any) {
+function parseNode(node: any, env: any) {
     if (node.childNodes) {
         node.childNodes.forEach((childNode: any, index: number) => {
             
@@ -39,14 +39,32 @@ function parseNode(node: any) {
                 // @ts-ignore
                 node.childNodes[index] = {
                     nodeName: "#text",
-                    value: evaluateExpr(expr, variables)
+                    value: evaluateExpr(expr, env)
                 }
 
             }
             
             if(nodeName === "for") {
                 const expr = childNode?.attrs?.[0]?.value;
-                const forStatement = evaluateForCondition(expr)
+                const forStatement = evaluateForCondition(expr, env)
+                const forChildren = childNode.childNodes
+
+                if(forStatement) {
+                    const array = getArrayValue(forStatement, env)
+
+                    const childrenArray: any[] = []
+
+                    array.forEach(currentArray => {
+                        forChildren.forEach((child:any) => {
+                            childrenArray.push(child)
+                        })
+                    })
+
+                    node.childNodes.splice(index, 1, ...childrenArray);
+
+                }
+
+
                 console.log(forStatement)
             }
 
@@ -66,13 +84,13 @@ function parseNode(node: any) {
 
             }
             
-            parseNode(childNode)
+            parseNode(childNode, null)
 
         });
     }
 }
 
-parseNode(rootNode)
+parseNode(rootNode, variables)
 
 const modifiedHtmlString = serialize(rootNode);
 
