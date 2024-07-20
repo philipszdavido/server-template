@@ -12,7 +12,7 @@ const inputHTML = `
 </head>
 <body>
   <div>{{2+4}}</div>
-  <div>@for(i=0; i<10; i++) { <h1>My First Heading</h1> }</div>
+  <div>@for(i of [7,9]) { <h1>My First Heading</h1> }</div>
   <div>@if(x > 5) { <h1>My First Heading</h1> }</div>
 </body>
 </html>

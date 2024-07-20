@@ -1,6 +1,22 @@
 
 const operators = ["+", "-", "*", "/", "<", ">"]
 
+const isNumber = (token: any) => {
+    return !Number.isNaN(+token)
+}
+
+const isNotNumber = (token: any) => {
+    return !!Number.isNaN(+token)
+}
+
+const isOperator = (token: any) => {
+    return operators.includes(token)
+}
+
+const isNotOperator = (token: any) => {
+    return !operators.includes(token)
+}
+
 function parseTokens(expr: string) {
 
     const ast = []
@@ -14,11 +30,11 @@ function parseTokens(expr: string) {
         const token = tokens[index];
 
         // check token is number
-        if(!Number.isNaN(+token)) {
+        if(isNumber(token)) {
             temp += token;
         }
 
-        if(operators.includes(token)) {
+        if(isOperator(token)) {
 
             ast.push(temp)
 
@@ -28,14 +44,14 @@ function parseTokens(expr: string) {
 
         }
 
-        if(!operators.includes(token) && !!Number.isNaN(+token)) {
+        if(isNotOperator(token) && isNotNumber(token)) {
             temp += token
 
             const nextToken = tokens?.[index + 1];
 
             if(nextToken) {
 
-                if(operators.includes(token) || !Number.isNaN(+token)) {
+                if(isOperator(token) || isNumber(token)) {
                     ast.push(temp)
                     temp = ""
                 }
@@ -146,6 +162,6 @@ export const evaluateExpr = (expr: string, variables: object) => {
     return result?.toString()
 }
 
-// console.log(evaluateExpr("22+3-45* 3", {}))
-// console.log(evaluateExpr("22+3-45* 3+uu", {uu: 90}))
-// console.log(evaluateExpr("x > 5", {x: 90}))
+console.log(evaluateExpr("22+3-45* 3", {}))
+console.log(evaluateExpr("22+3-45* 3+uu", {uu: 90}))
+console.log(evaluateExpr("x > 5", {x: 90}))
