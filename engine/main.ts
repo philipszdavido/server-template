@@ -1,4 +1,5 @@
 import { evaluateExpr } from "./expr_parser";
+import { evaluateForCondition } from "./for_syntax_parser";
 import { convertHTML } from "./html";
 import {parse, serialize} from "parse5"
 
@@ -45,7 +46,8 @@ function parseNode(node: any) {
             
             if(nodeName === "for") {
                 const expr = childNode?.attrs?.[0]?.value;
-                evaluateForCondition(expr)
+                const forStatement = evaluateForCondition(expr)
+                console.log(forStatement)
             }
 
             if(nodeName === "if") {
