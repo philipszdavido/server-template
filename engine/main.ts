@@ -44,7 +44,8 @@ function parseNode(node: any) {
             }
             
             if(nodeName === "for") {
-
+                const expr = childNode?.attrs?.[0]?.value;
+                evaluateForCondition(expr)
             }
 
             if(nodeName === "if") {
