@@ -1,48 +1,62 @@
-import http from "http"
-import fs from "fs"
+import http from "http";
+import fs from "fs";
+import { cwd } from "process";
 
-const PORT = 3000
+const PORT = 3000;
 
-const server = http.createServer((req: http.IncomingMessage, res: http.ServerResponse) => {
-    console.log(req.url, req.method)
+const readFileFromWebFolder = (file: string) => {
+    const webFolderFiles = cwd() + "/src/web/";
 
-    const urlParts = req.url?.split("/").filter(Boolean)
+    const basePath = webFolderFiles + file;
+    return fs.readFileSync(basePath)
+}
 
-    console.log(urlParts)
+const server = http.createServer((req, res) => {
+    console.log(req.url, req.method);
+
+    const urlParts = req.url?.split("/").filter(Boolean);
+
+    console.log(urlParts);
 
     // check for root and serve the index
-    if(!urlParts?.length) {
-
-        res.writeHead(200)
-        const file = fs.readFileSync('./web/index.html')
-        res.end(file)
-    
-    }
-
-    if(urlParts?.[0] === "style.css") {
-        
-        res.writeHead(200)
-        const file = fs.readFileSync('./web/style.css')
-        res.end(file)
-
-    }
-
-    if(urlParts?.[0] === "favicon.ico") {
-        
+    if (!urlParts?.length) {
         try {
-            const file = fs.readFileSync('./web/favicon.ico')
-            res.writeHead(200)
-            res.end(file)
-       
+            const file = readFileFromWebFolder('index.html');
+            res.writeHead(200);
+            res.end(file);
         } catch (error) {
-            res.writeHead(404)
+            console.error("Error reading index.html:", error);
+            res.writeHead(500);
+            res.end('Internal Server Error');
         }
     }
 
-    res.end()
+    if (urlParts?.[0] === "style.css") {
+        try {
+            const file = readFileFromWebFolder('style.css');
+            res.writeHead(200);
+            res.end(file);
+        } catch (error) {
+            console.error("Error reading style.css:", error);
+            res.writeHead(500);
+            res.end('Internal Server Error');
+        }
+    }
 
+    if (urlParts?.[0] === "favicon.ico") {
+        try {
+            const file = readFileFromWebFolder('favicon.ico');
+            res.writeHead(200);
+            res.end(file);
+        } catch (error) {
+            console.error("Error reading favicon.ico:", error);
+            res.writeHead(404);
+            res.end('File Not Found');
+        }
+    }
 
-})
+    res.end();
+});
 
-console.log("Server listening at " + PORT)
-server.listen(PORT)
+console.log("Server listening at http://localhost:" + PORT);
+server.listen(PORT);
