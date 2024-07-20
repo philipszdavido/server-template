@@ -1,5 +1,5 @@
 import { evaluateExpr } from "./expr_parser";
-import { evaluateForCondition, getArrayValue } from "./for_syntax_parser";
+import { evaluateForCondition, ForOfStatement, getArrayValue } from "./for_syntax_parser";
 import { convertHTML } from "./html";
 import {parse, serialize} from "parse5"
 
@@ -12,9 +12,9 @@ const inputHTML = `
   <title>Example</title>
 </head>
 <body>
-  <div>{{2+4}}</div>
-  <div>@for(i of [7,9]) { <span>For Child <b>{{i}}</b></span> } <section>A section</section></div>
-  <div>@if(x > 5) { <h1>My First Heading</h1> }</div>
+<div>{{2+4}}</div>
+<div>@for(i of [7,9]){<span>For Child <b>{{i}}</b></span>} <section>A section</section></div>
+<div>@if(x > 5) { <h1>My First Heading</h1> }</div>
 </body>
 </html>
 `;
@@ -28,8 +28,11 @@ const variables = {
 
 function parseNode(node: any, env: any) {
     if (node.childNodes) {
-        node.childNodes.forEach((childNode: any, index: number) => {
-            
+        const childNodes = node.childNodes
+        for (let index = 0; index < childNodes.length; index++) {
+
+            const childNode = childNodes[index];
+
             const nodeName = childNode.nodeName;
             const parentNode = node;
             const localEnv = childNode?.env
@@ -37,7 +40,7 @@ function parseNode(node: any, env: any) {
             if(nodeName === "expr-interpl") {
                 const expr = childNode?.attrs?.[0]?.value;
 
-                console.log(childNode, variables, env, localEnv)
+                console.log(childNode)
 
                 // @ts-ignore
                 node.childNodes[index] = {
@@ -48,28 +51,19 @@ function parseNode(node: any, env: any) {
             }
             
             if(nodeName === "for") {
-                const expr = childNode?.attrs?.[0]?.value;
+                const forNode = childNode
+                const expr = forNode?.attrs?.[0]?.value;
                 const forStatement = evaluateForCondition(expr, { ...variables, ...env, ...localEnv})
-                const forChildren = childNode.childNodes
+
+                const forChildren = forNode.childNodes
 
                 if(forStatement) {
 
                     const array = getArrayValue(forStatement, { ...variables, ...env, ...localEnv})
 
-                    const childrenArray: any[] = []
+                    const childrenArray = evaluateForChildren(array, forChildren, forStatement)
 
-                    array.forEach(currentArray => {
-                        forChildren.forEach((child:any) => {
-                            
-                            child.env = {
-                                [forStatement?.left?.name]: currentArray
-                            }
-
-                            // console.log(child)
-
-                            childrenArray.push(child)
-                        })
-                    })
+                    //console.log(childrenArray)
 
                     node.childNodes.splice(index, 1, ...childrenArray);
 
@@ -95,9 +89,15 @@ function parseNode(node: any, env: any) {
 
             }
             
+            if (childNode?.childNodes) {
+                childNode?.childNodes.forEach((child: any) => {
+                    child.env = {...childNode?.env, ...child?.env}
+                })
+            }
+
             parseNode(childNode, null)
 
-        });
+        }
     }
 }
 
@@ -106,3 +106,42 @@ parseNode(rootNode, variables)
 const modifiedHtmlString = serialize(rootNode);
 
 console.log(modifiedHtmlString);
+
+function evaluateForChildren(array: any[], forChildren: any[], forStatement: ForOfStatement) {
+    const childArray: any[] = []
+
+    array.forEach(currentArray => {
+
+        forChildren.forEach((child:any) => {
+            
+            child.env = {
+                [forStatement?.left?.name]: currentArray
+            }
+
+            // console.log(child.env)
+
+            childArray.push({...child})
+
+        })
+
+
+    })
+
+    if(childArray) {
+        childArray.forEach((child: any) => {
+
+            if (child?.childNodes) {
+
+                child?.childNodes.forEach((childNode: any) => {
+                    child.env = {...child?.env, ...childNode?.env}
+                })
+
+            }
+
+        })
+    }
+
+    //console.log(childArray)
+    return childArray;
+
+}

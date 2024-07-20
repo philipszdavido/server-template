@@ -10,7 +10,7 @@ class ArrayExpression {
     constructor(public elements: Literal[]) {}
 }
 
-class ForOfStatement {
+export class ForOfStatement {
     constructor(public left: Identifier, public right: ArrayExpression | Identifier) {}
 }
 
