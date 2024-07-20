@@ -182,7 +182,7 @@ export const getArrayValue = (forStatement: ForOfStatement, env: any): Array<any
 
         for (let index = 0; index < forStatement?.right.elements.length; index++) {
             const element = forStatement?.right.elements[index];
-            array.push(element)
+            array.push(element?.value)
         }
 
         returnArray = array

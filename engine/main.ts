@@ -13,7 +13,7 @@ const inputHTML = `
 </head>
 <body>
   <div>{{2+4}}</div>
-  <div>@for(i of [7,9]) { <span>For Child</span> }</div>
+  <div>@for(i of [7,9]) { <span>For Child <b>{{i}}</b></span> } <section>A section</section></div>
   <div>@if(x > 5) { <h1>My First Heading</h1> }</div>
 </body>
 </html>
@@ -32,30 +32,41 @@ function parseNode(node: any, env: any) {
             
             const nodeName = childNode.nodeName;
             const parentNode = node;
+            const localEnv = childNode?.env
 
             if(nodeName === "expr-interpl") {
                 const expr = childNode?.attrs?.[0]?.value;
 
+                console.log(childNode, variables, env, localEnv)
+
                 // @ts-ignore
                 node.childNodes[index] = {
                     nodeName: "#text",
-                    value: evaluateExpr(expr, env)
+                    value: evaluateExpr(expr, { ...variables, ...env, ...localEnv})
                 }
 
             }
             
             if(nodeName === "for") {
                 const expr = childNode?.attrs?.[0]?.value;
-                const forStatement = evaluateForCondition(expr, env)
+                const forStatement = evaluateForCondition(expr, { ...variables, ...env, ...localEnv})
                 const forChildren = childNode.childNodes
 
                 if(forStatement) {
-                    const array = getArrayValue(forStatement, env)
+
+                    const array = getArrayValue(forStatement, { ...variables, ...env, ...localEnv})
 
                     const childrenArray: any[] = []
 
                     array.forEach(currentArray => {
                         forChildren.forEach((child:any) => {
+                            
+                            child.env = {
+                                [forStatement?.left?.name]: currentArray
+                            }
+
+                            // console.log(child)
+
                             childrenArray.push(child)
                         })
                     })
@@ -65,13 +76,13 @@ function parseNode(node: any, env: any) {
                 }
 
 
-                console.log(forStatement)
+                // console.log(forStatement)
             }
 
             if(nodeName === "if") {
 
                 const expr = childNode?.attrs?.[0]?.value;
-                const result = evaluateExpr(expr, variables)
+                const result = evaluateExpr(expr, { ...variables, ...env, ...localEnv})
 
                 if(result) {
                     
