@@ -28,10 +28,10 @@ const variables = {
 
 function parseNode(node: any, env: any) {
     if (node.childNodes) {
-        const childNodes = node.childNodes
-        for (let index = 0; index < childNodes.length; index++) {
 
-            const childNode = childNodes[index];
+        for (let index = 0; index < node.childNodes.length; index++) {
+
+            const childNode = {...node.childNodes[index]};
 
             const nodeName = childNode.nodeName;
             const parentNode = node;
@@ -40,7 +40,7 @@ function parseNode(node: any, env: any) {
             if(nodeName === "expr-interpl") {
                 const expr = childNode?.attrs?.[0]?.value;
 
-                console.log(childNode)
+                // console.log(childNode)
 
                 // @ts-ignore
                 node.childNodes[index] = {
@@ -63,14 +63,11 @@ function parseNode(node: any, env: any) {
 
                     const childrenArray = evaluateForChildren(array, forChildren, forStatement)
 
-                    //console.log(childrenArray)
-
-                    node.childNodes.splice(index, 1, ...childrenArray);
+                    node.childNodes.splice(index, 1, ...[{}, ...childrenArray]);
 
                 }
 
 
-                // console.log(forStatement)
             }
 
             if(nodeName === "if") {
@@ -89,13 +86,17 @@ function parseNode(node: any, env: any) {
 
             }
             
-            if (childNode?.childNodes) {
-                childNode?.childNodes.forEach((child: any) => {
-                    child.env = {...childNode?.env, ...child?.env}
-                })
-            }
 
+            // if (childNode?.childNodes) {
+            //     childNode?.childNodes.forEach((child: any) => {
+            //         child.env = {...childNode?.env, ...child?.env}
+            //     })
+            // }
+
+            childNode.env = {...node.env, ...childNode?.env}
+    
             parseNode(childNode, null)
+            
 
         }
     }
@@ -113,35 +114,20 @@ function evaluateForChildren(array: any[], forChildren: any[], forStatement: For
     array.forEach(currentArray => {
 
         forChildren.forEach((child:any) => {
-            
-            child.env = {
-                [forStatement?.left?.name]: currentArray
+
+            const childNode = {...child,
+                env: {
+                    [forStatement?.left?.name]: currentArray
+                }
             }
-
-            // console.log(child.env)
-
-            childArray.push({...child})
+            
+            childArray.push({...childNode})
 
         })
 
 
     })
 
-    if(childArray) {
-        childArray.forEach((child: any) => {
-
-            if (child?.childNodes) {
-
-                child?.childNodes.forEach((childNode: any) => {
-                    child.env = {...child?.env, ...childNode?.env}
-                })
-
-            }
-
-        })
-    }
-
-    //console.log(childArray)
-    return childArray;
+    return childArray.map(c => ({...c}));
 
 }
