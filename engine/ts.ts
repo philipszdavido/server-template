@@ -26,7 +26,7 @@ const htmlString = `
 </head>
 <body>
 <div>{{2+4}}</div>
-<div class="for">@for(i of [7,9, 10]){<span>For Child <b>{{i}}</b></span>} <section>A section</section></div>
+<div class="for">@for(i of [7,9, 10]){<span>For Child <b>{{i}}</b></span> @for(ii of [2,3,4]){<strong>Strong</strong>} } <section>A section</section></div>
 <div>@if(x > 5) { <h1>My First Heading</h1> }</div>
 </body>
 </html>
@@ -135,10 +135,22 @@ class BuildNodes {
 
 
         node.childNodes?.forEach((child) => {
-            console.log(node.nodeName, node?.env, child.nodeName, child?.env)
+            // console.log(node.nodeName, node?.env, child.nodeName, child?.env)
             //if(child?.env) {
 
-                child['env'] = node?.env//{... node?.env, ...child?.env}
+            console.log(node.nodeName, node?.attrs, child.nodeName, child?.attrs)
+
+            child['env'] = {... child?.env, ...node?.env, }
+
+            const attrs = node.attrs || {};
+            Object.entries(attrs).forEach(([key, value]) => {
+                child['env'] = {
+                    ...child['env'],
+                    [key]: value
+                }
+            })
+
+
             //}
             this.build(child)
             //const newChildNode = this.build(child)
@@ -164,14 +176,14 @@ class BuildNodes {
 
             const array = getArrayValue(forStatement, { })
 
-            this.evaluateForChildren(array, forChildren, forStatement)
+            this.evaluateForChildren(array, forNode, forChildren, forStatement)
 
         }
 
         return forNode
     }
 
-    evaluateForChildren(array: any[], forChildren: any[], forStatement: ForOfStatement) {
+    evaluateForChildren(array: any[], forNode: DocumentNode, forChildren: any[], forStatement: ForOfStatement) {
 
         const childArray: any[] = []
 
@@ -186,7 +198,8 @@ class BuildNodes {
 
                 const childNode = {...child,
                     env: {
-                        [forStatement?.left?.name]: currentArray
+                        [forStatement?.left?.name]: currentArray,
+                        ...forNode?.env
                     },
                 }
 
