@@ -10,6 +10,7 @@ type DocumentNode = {
     nodeName: string;
     tagName:  string;
     value?: string;
+    env?: object;
     attrs: Array<{
         name: string;
         value: string;
@@ -25,7 +26,7 @@ const htmlString = `
 </head>
 <body>
 <div>{{2+4}}</div>
-<div class="for">@for(i of [7,9]){<span>For Child <b>{{i}}</b></span>} <section>A section</section></div>
+<div class="for">@for(i of [7,9, 10]){<span>For Child <b>{{i}}</b></span>} <section>A section</section></div>
 <div>@if(x > 5) { <h1>My First Heading</h1> }</div>
 </body>
 </html>
@@ -77,6 +78,10 @@ class BuildNodes {
         // newNode['attrs']= node?.attrs;
         // newNode['childNodes'] = []
 
+        if(nodeName === "#comment") {
+            return node
+        }
+
         if(nodeName === "#document") {
             node.childNodes?.forEach((child) => {
                 this.build(child)
@@ -117,11 +122,24 @@ class BuildNodes {
             }
         }
 
+        if(node?.env) {
+            Object.entries(node?.env)
+                .forEach(env => {
+                    const [name, value] = env
+                    this.htmlString += ` ${name}="${value}"`
+                })
+        }
+
         this.htmlString += ">"
 
 
 
         node.childNodes?.forEach((child) => {
+            console.log(node.nodeName, node?.env, child.nodeName, child?.env)
+            //if(child?.env) {
+
+                child['env'] = node?.env//{... node?.env, ...child?.env}
+            //}
             this.build(child)
             //const newChildNode = this.build(child)
             //newNode['childNodes'].push(newChildNode)
@@ -140,7 +158,7 @@ class BuildNodes {
         const expr = forNode?.attrs?.[0]?.value;
         const forStatement = evaluateForCondition(expr, { })
 
-        const forChildren = forNode.childNodes
+        const forChildren = [...forNode.childNodes]
         
         if(forStatement) {
 
@@ -155,25 +173,24 @@ class BuildNodes {
 
     evaluateForChildren(array: any[], forChildren: any[], forStatement: ForOfStatement) {
 
-        // const childArray: any[] = []
+        const childArray: any[] = []
+
+        forChildren.forEach((child:any) => {
+            childArray.push({...child})
+        })
+
 
         array.forEach(currentArray => {
 
-            forChildren.forEach((child:any) => {
+            childArray.forEach((child:any) => {
 
                 const childNode = {...child,
                     env: {
                         [forStatement?.left?.name]: currentArray
                     },
-                    attrs: [
-                        ...child.attrs,
-                        {
-                            name: forStatement?.left?.name,
-                            value: currentArray
-                        }
-                    ]
                 }
 
+                // @ts-ignore
                 this.build(childNode)
 
 

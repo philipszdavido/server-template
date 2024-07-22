@@ -13,7 +13,7 @@ const inputHTML = `
 </head>
 <body>
 <div>{{2+4}}</div>
-<div>@for(i of [7,9]){<span>For Child <b>{{i}}</b></span>} <section>A section</section></div>
+<div>@for(i of [7,9,10]){<span>For Child <b>{{i}}</b></span>@for(ii of [2,3,4]){<strong>Strong</strong>}} <section>A section</section></div>
 <div>@if(x > 5) { <h1>My First Heading</h1> }</div>
 </body>
 </html>
