@@ -283,9 +283,9 @@ export class EvaluateNode {
 
 }
 
-export default function main(){
+export default function main(html: string){
 
-    const convertedHTML = convertHTML(htmlString);
+    const convertedHTML = convertHTML(html);
 
     // @ts-ignore
     const rootNode: DocumentNode = parse(convertedHTML)

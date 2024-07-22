@@ -1,11 +1,12 @@
 import http from "http";
 import fs from "fs";
 import { cwd } from "process";
+import main from "../engine";
 
 const PORT = 3000;
 
 const readFileFromWebFolder = (file: string) => {
-    const webFolderFiles = cwd() + "/src/web/";
+    const webFolderFiles = cwd() + "/src/views/";
 
     const basePath = webFolderFiles + file;
     return fs.readFileSync(basePath)
@@ -22,8 +23,13 @@ const server = http.createServer((req, res) => {
     if (!urlParts?.length) {
         try {
             const file = readFileFromWebFolder('index.html');
+
+            const fileContents =  file.toString()
+
+            const processedHtml = main(fileContents)
+
             res.writeHead(200);
-            res.end(file);
+            res.end(processedHtml);
         } catch (error) {
             console.error("Error reading index.html:", error);
             res.writeHead(500);
