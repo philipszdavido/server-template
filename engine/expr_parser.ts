@@ -72,7 +72,7 @@ function parseTokens(expr: string) {
 
 function evaluateAst(ast: string[]) {
 
-    let acc = 0;
+    let acc: any = 0;
 
     for (let index = 0; index < ast.length; index++) {
 
@@ -81,6 +81,10 @@ function evaluateAst(ast: string[]) {
 
         if(!Number.isNaN(+currentAst) && index == 0) {
             acc = +currentAst
+        }
+
+        if(Number.isNaN(+currentAst) && index == 0) {
+            acc = currentAst
         }
 
         if(operators.includes(currentAst)) {
@@ -161,7 +165,7 @@ export const evaluateExpr = (expr: string, variables: object) => {
     const refinedAst = replaceVariables(ast, variables)
     const result = evaluateAst(refinedAst)
 
-    console.log(variables, ast, refinedAst, result)
+    // console.log(variables, ast, refinedAst, result)
 
     return result?.toString()
 }
