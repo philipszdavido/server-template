@@ -290,12 +290,12 @@ class EvaluateNode {
 
 }
 
-const parsedNode = new EvaluateForNode(rootNode).start()
+// const parsedNode = new EvaluateForNode(rootNode).start()
 
 // console.log(parsedNode)
 
-const finalNode = new EvaluateNode(parsedNode).start()
-console.log(finalNode)
+// const finalNode = new EvaluateNode(parsedNode).start()
+// console.log(finalNode)
 
 
 // @ts-ignore
