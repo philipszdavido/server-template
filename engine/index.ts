@@ -31,12 +31,7 @@ const htmlString = `
 </html>
 `;
 
-const convertedHTML = convertHTML(htmlString);
-
-// @ts-ignore
-const rootNode: DocumentNode = parse(convertedHTML)
-
-class EvaluateForNode {
+export class EvaluateForNode {
 
     node!: DocumentNode
 
@@ -177,7 +172,7 @@ class EvaluateForNode {
 
 }
 
-class EvaluateNode {
+export class EvaluateNode {
 
     private htmlString = ""
 
@@ -285,6 +280,21 @@ class EvaluateNode {
         return node
 
     }
+
+}
+
+export default function main(){
+
+    const convertedHTML = convertHTML(htmlString);
+
+    // @ts-ignore
+    const rootNode: DocumentNode = parse(convertedHTML)
+
+    const parsedNode = new EvaluateForNode(rootNode).start()
+
+    const finalNode = new EvaluateNode(parsedNode).start()
+
+    return finalNode
 
 }
 
