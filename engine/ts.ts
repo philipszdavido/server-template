@@ -229,8 +229,8 @@ class EvaluateNode {
             const condition = attrs.find(attr => attr?.name === 'condition')?.value as string
             const value = evaluateExpr(condition, variablesObj);
 
-            if(!value) {
-                return node
+            if(!+value) {
+                return;
             }
 
         }
@@ -269,7 +269,7 @@ class EvaluateNode {
 
                 const attr = node?.attrs[index];
 
-                this.htmlString += attr?.name + '="' + attr?.value + '"'
+                this.htmlString += attr?.name + '="' + attr?.value + '" '
 
             }
         }
