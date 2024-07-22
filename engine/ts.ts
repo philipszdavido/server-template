@@ -27,7 +27,8 @@ const htmlString = `
 <body>
 <div>{{2+4}}</div>
 <div class="for">@for(i of [7,9, 10]){<span>For Child <b>{{i}}</b></span> @for(ii of [2,3,4]){<strong>Strong</strong>} } <section>A section</section></div>
-<div>@if(x > 5) { <h1>My First Heading</h1> }</div>
+<button>@for(y of [100,200]){@if(y < 100){<i>{{y}}</i>}}</button>
+<div>@if(x > 5) {<h1>My First Heading</h1> }</div>
 </body>
 </html>
 `;
@@ -43,7 +44,7 @@ class EvaluateForNode {
 
     private htmlString = ""
 
-    constructor(public rootNode: DocumentNode) {
+    constructor(private rootNode: DocumentNode) {
 
     }
 
@@ -55,8 +56,6 @@ class EvaluateForNode {
             this.node = this.build(rootNode)
         }
 
-        //return this.node
-
         return this.htmlString
 
     }
@@ -64,15 +63,6 @@ class EvaluateForNode {
     private build(node: DocumentNode) {
 
         const nodeName = node?.nodeName
-
-        // const newNode = {
-        //     childNodes: []
-        // } as unknown as  DocumentNode
-
-        // newNode['nodeName'] = node?.nodeName;
-        // newNode['tagName']= node?.tagName;
-        // newNode['attrs']= node?.attrs;
-        // newNode['childNodes'] = []
 
         if(nodeName === "#comment") {
             return node
@@ -128,25 +118,15 @@ class EvaluateForNode {
 
         this.htmlString += ">"
 
-
-
         node.childNodes?.forEach((child) => {
-            // console.log(node.nodeName, node?.env, child.nodeName, child?.env)
-            //if(child?.env) {
-
-            // console.log(node.nodeName, node?.attrs, child.nodeName, child?.attrs)
 
             child['env'] = {... child?.env, ...node?.env, }
 
             this.build(child)
-            //const newChildNode = this.build(child)
-            //newNode['childNodes'].push(newChildNode)
+
         })
 
         this.htmlString += "</" + node?.nodeName + ">"
-
-
-        //return newNode;
 
         return node
     }
@@ -177,7 +157,6 @@ class EvaluateForNode {
             childArray.push({...child})
         })
 
-
         array.forEach(currentArray => {
 
             childArray.forEach((child:any) => {
@@ -192,28 +171,64 @@ class EvaluateForNode {
                 // @ts-ignore
                 this.build(childNode)
 
-
-                //childArray.push({...childNode})
-
             })
 
-
         })
-
-        //return childArray.map(c => ({...c}));
 
     }
 
 }
 
 class EvaluateNode {
-    node!: DocumentNode
+
+    constructor(private htmlString: string) {}
 
     start() {
-
+        const rootNode = parse(this.htmlString) as unknown as DocumentNode;
+        this.build(rootNode)
     }
 
-    private build(rootNode: DocumentNode) {
+    private build(node: DocumentNode) {
+
+        const {
+            nodeName,
+            attrs,
+            childNodes
+        } = node;
+
+        if(nodeName === "expr-interpl") {
+
+            const variablesObj = {}
+
+            attrs?.forEach(attr => {
+                // @ts-ignore
+                variablesObj[attr.name] = attr.value
+            })
+
+            const expr = attrs.find(attr => attr?.name === 'expr')?.value as string
+            const value = evaluateExpr(expr, {});
+
+        }
+
+        if(nodeName === "if") {
+
+            const variablesObj = {}
+
+            attrs?.forEach(attr => {
+                // @ts-ignore
+                variablesObj[attr.name] = attr.value
+            })
+
+            const condition = attrs.find(attr => attr?.name === 'condition')?.value as string
+            const value = evaluateExpr(condition, {});
+
+        }
+
+        childNodes?.forEach((child) => {
+
+            this.build(child)
+
+        })
 
     }
 }
@@ -222,7 +237,11 @@ const parsedNode = new EvaluateForNode(rootNode).start()
 
 console.log(parsedNode)
 
-// @ts-ignore
-// const modifiedHtmlString = serialize(parsedNode);
+// const finalNode = new EvaluateNode(parsedNode).start()
+// console.log(finalNode)
 
+
+// @ts-ignore
+// const modifiedHtmlString = serialize(finalNode);
+//
 // console.log(modifiedHtmlString);
