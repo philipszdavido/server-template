@@ -108,7 +108,7 @@ const modifiedHtmlString = serialize(rootNode);
 
 console.log(modifiedHtmlString);
 
-function evaluateForChildren(array: any[], forChildren: any[], forStatement: ForOfStatement) {
+export function evaluateForChildren(array: any[], forChildren: any[], forStatement: ForOfStatement) {
     const childArray: any[] = []
 
     array.forEach(currentArray => {
