@@ -1,9 +1,7 @@
-import cheerio from "cheerio"
 import { convertHTML } from "./html";
-import { parse, parseFragment, serialize } from "parse5";
+import { parse } from "parse5";
 import { evaluateExpr } from "./expr_parser";
 import {evaluateForCondition, ForOfStatement, getArrayValue} from "./for_syntax_parser";
-import { evaluateForChildren } from "./main";
 
 type DocumentNode = {
     childNodes: Array<DocumentNode>;
