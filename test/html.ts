@@ -12,7 +12,7 @@ console.log(convertHTML(`
 <div class="for">@for(i of [7,9, 10]){<span>For Child <b>{{i}}</b></span> @for(ii of [2,3,4]){<strong>Strong</strong>} } <section>A section</section></div>
 <button>@for(y of [100,200]){@if(y < 100){<i>{{y}}</i>}}</button>
 <div>@if(x > 5) {<h1>My First Heading</h1> }</div>
-      @for(fruit of ["mango", "orange"]) {
+      @for(fruit of ['mango', 'orange']) {
         <i>{{fruit}}</i>
       }
 

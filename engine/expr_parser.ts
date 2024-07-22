@@ -156,9 +156,12 @@ function replaceVariables(ast: string[], variables: any) {
 }
 
 export const evaluateExpr = (expr: string, variables: object) => {
-    // console.log(variables)
     const ast = parseTokens(expr)
+
     const refinedAst = replaceVariables(ast, variables)
     const result = evaluateAst(refinedAst)
+
+    console.log(variables, ast, refinedAst, result)
+
     return result?.toString()
 }

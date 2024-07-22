@@ -59,14 +59,16 @@
 
   @for(i of [7,9, 10]) {
     <span>For Child <b>{{i}}</b></span>
-    @for(ii of [2,3,4]) {
-      <strong>Strong</strong>
-    }
+<!--    @for(ii of [2,3,4]) {-->
+<!--      <strong>Strong</strong>-->
+<!--    }-->
   }
 
-  @for(fruit of ["mango", "orange"]) {
-    <i>{{fruit}}</i>
+  <div>
+  @for(fruit of ['mango', 'orange']) {
+    <i>Fruit {{fruit}}</i>
   }
+  </div>
 
   <section>A section</section>
 
