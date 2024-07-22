@@ -32,16 +32,12 @@ const htmlString = `
 </html>
 `;
 
-// const htmlString = `
-// @for(i of [7,9]){<span>ForChild</span>}
-// `;
-
 const convertedHTML = convertHTML(htmlString);
 
 // @ts-ignore
 const rootNode: DocumentNode = parse(convertedHTML)
 
-class BuildNodes {
+class EvaluateForNode {
 
     node!: DocumentNode
 
@@ -138,20 +134,10 @@ class BuildNodes {
             // console.log(node.nodeName, node?.env, child.nodeName, child?.env)
             //if(child?.env) {
 
-            console.log(node.nodeName, node?.attrs, child.nodeName, child?.attrs)
+            // console.log(node.nodeName, node?.attrs, child.nodeName, child?.attrs)
 
             child['env'] = {... child?.env, ...node?.env, }
 
-            const attrs = node.attrs || {};
-            Object.entries(attrs).forEach(([key, value]) => {
-                child['env'] = {
-                    ...child['env'],
-                    [key]: value
-                }
-            })
-
-
-            //}
             this.build(child)
             //const newChildNode = this.build(child)
             //newNode['childNodes'].push(newChildNode)
@@ -220,7 +206,19 @@ class BuildNodes {
 
 }
 
-const parsedNode = new BuildNodes(rootNode).start()
+class EvaluateNode {
+    node!: DocumentNode
+
+    start() {
+
+    }
+
+    private build(rootNode: DocumentNode) {
+
+    }
+}
+
+const parsedNode = new EvaluateForNode(rootNode).start()
 
 console.log(parsedNode)
 
