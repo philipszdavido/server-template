@@ -209,7 +209,11 @@ class EvaluateNode {
             })
 
             const expr = attrs.find(attr => attr?.name === 'expr')?.value as string
-            const value = evaluateExpr(expr, {});
+            const value = evaluateExpr(expr, variablesObj);
+
+            this.htmlString += value;
+
+            return node
 
         }
 
@@ -223,7 +227,11 @@ class EvaluateNode {
             })
 
             const condition = attrs.find(attr => attr?.name === 'condition')?.value as string
-            const value = evaluateExpr(condition, {});
+            const value = evaluateExpr(condition, variablesObj);
+
+            if(!value) {
+                return node
+            }
 
         }
 
