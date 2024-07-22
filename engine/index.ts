@@ -21,7 +21,7 @@ export class EvaluateForNode {
 
     private htmlString = ""
 
-    constructor(private rootNode: DocumentNode) {
+    constructor(private rootNode: DocumentNode, private globalVariables = {}) {
 
     }
 
@@ -93,6 +93,14 @@ export class EvaluateForNode {
                 })
         }
 
+        if(this.globalVariables) {
+            Object.entries(this.globalVariables)
+                .forEach(globalVariable => {
+                    const [name, value] = globalVariable
+                    this.htmlString += ` ${name}="${value}"`
+                })
+        }
+
         this.htmlString += ">"
 
         node.childNodes?.forEach((child) => {
@@ -110,16 +118,30 @@ export class EvaluateForNode {
 
     buildForNode(forNode: DocumentNode) {
 
-        const expr = forNode?.attrs?.[0]?.value;
+        const expr = forNode?.attrs?.find(attr => attr?.name === "condition")?.value;
+
+        if(!expr) {
+            throw Error("Invalid Expression condition on For-Of statement")
+        }
+
+        const variablesObject = {
+            ...this.globalVariables,
+        }
+
+        forNode?.attrs?.forEach((attr) => {
+
+            // @ts-ignore
+            variablesObject[attr.name] = attr.value
+
+        })
+
         const forStatement = evaluateForCondition(expr)
 
         const forChildren = [...forNode.childNodes]
         
         if(forStatement) {
 
-            const array = getArrayValue(forStatement, { })
-
-            console.log(array, forStatement, expr)
+            const array = getArrayValue(forStatement, variablesObject)
 
             this.evaluateForChildren(array, forNode, forChildren, forStatement)
 

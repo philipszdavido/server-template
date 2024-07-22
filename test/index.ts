@@ -16,7 +16,7 @@ const htmlString = `
 
     <div>@if(x > 5) {<h1>My First Heading</h1> }</div>
 
-      @for(fruit of ["mango", "orange"]) {
+      @for(fruit of [ 'mango' , 'orange' ]) {
         <i>{{fruit}}</i>
       }
 
@@ -30,7 +30,7 @@ const convertedHTML = convertHTML(htmlString);
 // @ts-ignore
 const rootNode: DocumentNode = parse(convertedHTML)
 
-const parsedNode = new EvaluateForNode(rootNode).start()
+const parsedNode = new EvaluateForNode(rootNode, { name: 'nnamdi'}).start()
 
 console.log(parsedNode)
 
