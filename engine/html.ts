@@ -8,13 +8,31 @@ export function convertHTML(htmlString: string) {
     let convertedHTML = htmlString;
 
     // Replace {{expression here}} with <expr-interpl expr="expression here"></expr-interpl>
-    convertedHTML = convertedHTML.replace(exprRegex, '<expr-interpl expr="$1"></expr-interpl>');
+    while(/\{\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)}}/g.test(convertedHTML)) {
+
+        convertedHTML = convertedHTML.replace(exprRegex, '<expr-interpl expr="$1"></expr-interpl>');
+
+    }
 
     // Replace @for(...) { ... } with <for condition=""></for>
-    convertedHTML = convertedHTML.replace(forRegex, '<for condition="$1">$2</for>');
+    while(/@for\(([^)]*)\)\s*{([^{}]*(?:\{[^{}]*\}[^{}]*)*)}/g.test(convertedHTML)) {
+
+        convertedHTML = convertedHTML.replace(forRegex, '<for condition="$1">$2</for>');
+
+    }
+
+    // while(/@for\(([^)]*)\)\s*{([^{}]*(?:\{[^{}]*\}[^{}]*)*)}/g.test(convertedHTML)) {
+    //
+    //     convertedHTML = convertedHTML.replace(forRegex, '<for condition="$1">$2</for>');
+    //
+    // }
 
     // Replace @if(...) { ... } with <if condition=""></if>
-    convertedHTML = convertedHTML.replace(ifRegex, '<if condition="$1">$2</if>');
+    while(/@if\(([^)]*)\)\s*{([^{}]*(?:\{[^{}]*\}[^{}]*)*)}/g.test(convertedHTML)) {
+
+        convertedHTML = convertedHTML.replace(ifRegex, '<if condition="$1">$2</if>');
+
+    }
 
     return convertedHTML;
 }
