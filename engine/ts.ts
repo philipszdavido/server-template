@@ -181,11 +181,14 @@ class EvaluateForNode {
 
 class EvaluateNode {
 
-    constructor(private htmlString: string) {}
+    private htmlString = ""
+
+    constructor(private forParsedHtmlString: string) {}
 
     start() {
-        const rootNode = parse(this.htmlString) as unknown as DocumentNode;
+        const rootNode = parse(this.forParsedHtmlString) as unknown as DocumentNode;
         this.build(rootNode)
+        return this.htmlString
     }
 
     private build(node: DocumentNode) {
@@ -224,21 +227,67 @@ class EvaluateNode {
 
         }
 
+        if(nodeName === "#comment") {
+            return node
+        }
+
+        if(nodeName === "#document") {
+            node.childNodes?.forEach((child) => {
+                this.build(child)
+            })
+
+            return node;
+        }
+
+        if (nodeName === "#documentType") {
+            node.childNodes?.forEach((child) => {
+                this.build(child)
+            })
+
+            return node;
+
+        }
+
+        if (nodeName === "#text") {
+            this.htmlString += node?.value
+            return node
+        }
+
+        this.htmlString += "<" + node?.nodeName
+
+        if(node?.attrs?.length) {
+            this.htmlString += " "
+            for (let index = 0; index < node?.attrs.length; index++) {
+
+                const attr = node?.attrs[index];
+
+                this.htmlString += attr?.name + '="' + attr?.value + '"'
+
+            }
+        }
+
+        this.htmlString += ">"
+
         childNodes?.forEach((child) => {
 
             this.build(child)
 
         })
 
+        this.htmlString += "</" + node?.nodeName + ">"
+
+        return node
+
     }
+
 }
 
 const parsedNode = new EvaluateForNode(rootNode).start()
 
-console.log(parsedNode)
+// console.log(parsedNode)
 
-// const finalNode = new EvaluateNode(parsedNode).start()
-// console.log(finalNode)
+const finalNode = new EvaluateNode(parsedNode).start()
+console.log(finalNode)
 
 
 // @ts-ignore
