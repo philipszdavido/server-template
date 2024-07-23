@@ -13,7 +13,7 @@ console.log(convertHTML(`
 <button>@for(y of [100,200]){@if(y < 100){<i>{{y}}</i>}}</button>
 <div> @if (x > 5) { <h1>My First Heading</h1> }</div>
       @for (fruit of ['mango', 'orange']) {
-        <i>{{fruit}}</i>
+        <i> {{ fruit }}</i>
       }
 
 </body>
