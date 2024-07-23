@@ -1,8 +1,10 @@
 export function convertHTML(htmlString: string) {
     // Regular expressions to match the patterns
     const exprRegex = /\{\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)}}/g; // Matches {{expression here}}
-    const forRegex = /@for\(([^)]*)\)\s*{([^{}]*(?:\{[^{}]*\}[^{}]*)*)}/g; // Matches @for(...) { ... }
-    const ifRegex = /@if\(([^)]*)\)\s*{([^{}]*(?:\{[^{}]*\}[^{}]*)*)}/g; // Matches @if(...) { ... }
+    // const forRegex = /@for\(([^)]*)\)\s*{([^{}]*(?:\{[^{}]*\}[^{}]*)*)}/g; // Matches @for(...) { ... }
+    const forRegex = /@for\s*\(([^)]*)\)\s*{([^{}]*(?:\{[^{}]*\}[^{}]*)*)}/g;
+    // const ifRegex = /@if\(([^)]*)\)\s*{([^{}]*(?:\{[^{}]*\}[^{}]*)*)}/g; // Matches @if(...) { ... }
+    const ifRegex = /@if\s*\(([^)]*)\)\s*{([^{}]*(?:\{[^{}]*\}[^{}]*)*)}/g;
 
     // Replace patterns with corresponding custom tags
     let convertedHTML = htmlString;
@@ -20,12 +22,6 @@ export function convertHTML(htmlString: string) {
         convertedHTML = convertedHTML.replace(forRegex, '<for condition="$1">$2</for>');
 
     }
-
-    // while(/@for\(([^)]*)\)\s*{([^{}]*(?:\{[^{}]*\}[^{}]*)*)}/g.test(convertedHTML)) {
-    //
-    //     convertedHTML = convertedHTML.replace(forRegex, '<for condition="$1">$2</for>');
-    //
-    // }
 
     // Replace @if(...) { ... } with <if condition=""></if>
     while(/@if\(([^)]*)\)\s*{([^{}]*(?:\{[^{}]*\}[^{}]*)*)}/g.test(convertedHTML)) {
